@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 
-st.set_page_config(page_title="📆 予定調整アプリ", page_icon="📅")
+st.set_page_config(page_title="📆 予定調整", page_icon="📅")
 
-st.title("📆 1時間ごと予定調整アプリ")
+st.title("📆 予定調整")
 
 # セッションステートの初期化
 if "events" not in st.session_state:

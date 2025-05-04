@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>予定調整アプリ</title>
+</head>
+<body>
+    <h1>📆 予定調整アプリ（Flask版）</h1>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+    <h2>イベント追加</h2>
+    <form method="POST">
+        イベント名: <input type="text" name="new_event"><br>
+        候補日(カンマ区切り): <input type="text" name="new_dates"><br>
+        開始時刻: <input type="number" name="start_hour" min="0" max="23" value="9"><br>
+        終了時刻: <input type="number" name="end_hour" min="1" max="24" value="21"><br>
+        <button type="submit">イベント追加</button>
+    </form>
+
+    <h2>イベント一覧</h2>
+    <ul>
+        {% for event in events.keys() %}
+            <li><a href="{{ url_for('event', event_name=event) }}">{{ event }}</a></li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

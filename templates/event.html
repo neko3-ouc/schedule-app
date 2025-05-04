@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ event_name }}の予定調整</title>
+</head>
+<body>
+    <h1>📅 {{ event_name }}の予定調整</h1>
+
+    {% if message %}
+        <p>{{ message }}</p>
+    {% endif %}
+
+    <form method="POST">
+        あなたの名前: <input type="text" name="name" required><br>
+
+        <h3>予定を選択</h3>
+        {% for row in df %}
+            <input type="checkbox" name="slot_{{ loop.index0 }}">
+            {{ row["日付"] }} {{ row["時間帯"] }}（現在OK人数: {{ row["OK人数"] }}）<br>
+        {% endfor %}
+
+        <button type="submit">予定送信</button>
+    </form>
+
+    <p><a href="{{ url_for('index') }}">← 戻る</a></p>
+</body>
+</html>

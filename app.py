@@ -96,14 +96,27 @@ if event_names:
 
 else:
     st.info("まずイベントを追加してください。")
+# 空き状況表示
+st.subheader(f"📊 「{selected_event}」の空き状況")
 
-# イベント内容確認用
-if st.button("📋 イベント一覧を確認"):
-    st.subheader("📄 登録済みイベントの内容")
-    for event in get_event_names():
-        ws = spreadsheet.worksheet(event)
-        values = ws.get_all_values()
-        st.write(f"### 📑 {event}")
-        st.write(values)
+if not df.empty:
+    dates = df["日付"].unique()
+
+    for date in dates:
+        st.write(f"### 📅 {date}")
+        slots = df[df["日付"] == date]["時間帯"].unique()
+
+        result_data = []
+        for slot in slots:
+            count = df[(df["日付"] == date) & (df["時間帯"] == slot) & (df["名前"] != "")].shape[0]
+            result_data.append({"時間帯": slot, "希望人数": f"{count}人"})
+
+        result_df = pd.DataFrame(result_data)
+        st.table(result_df)
+else:
+    st.write("まだ参加者が登録されていません。")
+
+
+
 
 

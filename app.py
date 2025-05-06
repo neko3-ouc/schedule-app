@@ -87,15 +87,6 @@ if event_names:
     else:
         st.write("まだ候補日が登録されていません。")
 
-    # 空き状況表示
-    st.subheader(f"📊 「{selected_event}」の空き状況")
-    if not df.empty:
-        st.dataframe(df)
-    else:
-        st.write("まだ参加者が登録されていません。")
-
-else:
-    st.info("まずイベントを追加してください。")
 # 空き状況表示
 st.subheader(f"📊 「{selected_event}」の空き状況")
 

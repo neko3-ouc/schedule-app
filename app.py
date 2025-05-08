@@ -1,4 +1,18 @@
+import streamlit as st
 from datetime import datetime
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+
+# 認証とスプレッドシート接続の設定（例）
+scope = ['https://spreadsheets.google.com/feeds',
+         'https://www.googleapis.com/auth/drive']
+creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
+client = gspread.authorize(creds)
+spreadsheet = client.open("schedule-app")
+
+# イベント名一覧を取得する関数
+def get_event_names():
+    return [ws.title for ws in spreadsheet.worksheets()]
 
 # イベント追加フォーム
 with st.form("add_event_form"):

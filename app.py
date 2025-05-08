@@ -38,7 +38,7 @@ with st.form("add_event_form"):
                 st.rerun()
         else:
             st.error("⚠️ 全ての項目を正しく入力してください。")
-# イベント削除機能
+
 st.subheader("🗑️ イベントを削除")
 
 event_names = get_event_names()

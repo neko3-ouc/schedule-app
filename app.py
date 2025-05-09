@@ -3,17 +3,19 @@ from datetime import datetime
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-# 認証とスプレッドシート接続の設定（例）
-scope = ['https://spreadsheets.google.com/feeds',
-         'https://www.googleapis.com/auth/drive']
-creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', scope)
+# 認証とスプレッドシート接続の設定
+scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
+service_account_info = st.secrets["gcp_service_account"]
+creds = ServiceAccountCredentials.from_json_keyfile_dict(service_account_info, scope)
 client = gspread.authorize(creds)
 spreadsheet = client.open("schedule-app")
-
 
 # イベント名一覧を取得する関数
 def get_event_names():
     return [ws.title for ws in spreadsheet.worksheets()]
+
+# --- StreamlitアプリのUI部 ---
+st.title("📅 スケジュール調整アプリ")
 
 # イベント追加フォーム
 with st.form("add_event_form"):
@@ -44,18 +46,18 @@ with st.form("add_event_form"):
                         st.error(f"⚠️ 日付の形式が不正です: {d}")
 
                 for date in valid_dates:
-                    date_str = f"'{date}"  # ← ここでシングルクォート付けて文字列にする
+                    date_str = f"'{date}"
                     for hour in range(start_hour, end_hour):
                         slot = f"{hour}:00-{hour+1}:00"
                         ws.append_row(["", date_str, slot])
 
                 st.success(f"✅ イベント「{new_event}」を追加しました！")
-                st.rerun()
+                st.experimental_rerun()
         else:
             st.error("⚠️ 全ての項目を正しく入力してください。")
 
+# イベント削除
 st.subheader("🗑️ イベントを削除")
-
 event_names = get_event_names()
 
 if event_names:
@@ -65,11 +67,8 @@ if event_names:
             worksheet_to_delete = spreadsheet.worksheet(event_to_delete)
             spreadsheet.del_worksheet(worksheet_to_delete)
             st.success(f"✅ イベント「{event_to_delete}」を削除しました！")
-            st.rerun()
+            st.experimental_rerun()
         except Exception as e:
             st.error(f"削除に失敗しました: {e}")
 else:
     st.info("削除できるイベントがありません。")
-
-
-

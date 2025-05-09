@@ -10,6 +10,7 @@ creds = ServiceAccountCredentials.from_json_keyfile_name('credentials.json', sco
 client = gspread.authorize(creds)
 spreadsheet = client.open("schedule-app")
 
+
 # イベント名一覧を取得する関数
 def get_event_names():
     return [ws.title for ws in spreadsheet.worksheets()]

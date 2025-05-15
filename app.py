@@ -52,7 +52,7 @@ with st.form("add_event_form"):
                         ws.append_row(["", date_str, slot])
 
                 st.success(f"✅ イベント「{new_event}」を追加しました！")
-                st.experimental_rerun()
+                st.rerun()
         else:
             st.error("⚠️ 全ての項目を正しく入力してください。")
 
@@ -67,8 +67,63 @@ if event_names:
             worksheet_to_delete = spreadsheet.worksheet(event_to_delete)
             spreadsheet.del_worksheet(worksheet_to_delete)
             st.success(f"✅ イベント「{event_to_delete}」を削除しました！")
-            st.experimental_rerun()
+            st.rerun()
         except Exception as e:
             st.error(f"削除に失敗しました: {e}")
 else:
     st.info("削除できるイベントがありません。")
+
+st.subheader("📨 予定を登録する")
+
+# イベント一覧取得
+event_names = get_event_names()
+
+if event_names:
+    selected_event = st.selectbox("登録するイベントを選んでください", event_names)
+
+    with st.form("add_schedule_form"):
+        name = st.text_input("名前")
+        date = st.text_input("希望日（例: 2025-05-05）")
+        time_slot = st.text_input("希望時間帯（例: 14:00-15:00）")
+        submitted_schedule = st.form_submit_button("予定を登録する")
+
+        if submitted_schedule:
+            if name and date and time_slot:
+                try:
+                    # 該当のイベントシート取得
+                    ws = spreadsheet.worksheet(selected_event)
+                    ws.append_row([name, f"'{date}", time_slot])
+                    st.success(f"✅ {name}さんの予定を登録しました！")
+                    st.rerun()
+                except Exception as e:
+                    st.error(f"登録に失敗しました: {e}")
+            else:
+                st.error("⚠️ 全ての項目を入力してください。")
+else:
+    st.info("登録できるイベントがまだありません。")
+import pandas as pd
+
+st.subheader("📊 参加希望集計")
+
+if event_names:
+    selected_event_for_summary = st.selectbox("集計するイベントを選んでください", event_names, key="summary_event")
+
+    if st.button("集計する"):
+        try:
+            ws = spreadsheet.worksheet(selected_event_for_summary)
+            data = ws.get_all_records()  # ヘッダー付きのデータを取得
+
+            if data:
+                df = pd.DataFrame(data)
+                # 時間帯ごとに名前が入力されている数をカウント
+                summary = df.groupby("時間帯").apply(lambda x: x["名前"].apply(bool).sum()).reset_index()
+                summary.columns = ["時間帯", "人数"]
+
+                st.dataframe(summary)
+            else:
+                st.info("データがありません。")
+
+        except Exception as e:
+            st.error(f"集計に失敗しました: {e}")
+else:
+    st.info("集計できるイベントがありません。")

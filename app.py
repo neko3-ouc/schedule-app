@@ -73,35 +73,41 @@ if event_names:
 else:
     st.info("削除できるイベントがありません。")
 
-st.subheader("📨 予定を登録する")
-
-# イベント一覧取得
+# イベント選択
+st.subheader("📥 予定を登録")
 event_names = get_event_names()
 
 if event_names:
-    selected_event = st.selectbox("登録するイベントを選んでください", event_names)
+    selected_event = st.selectbox("イベントを選んでください", event_names)
+    ws = spreadsheet.worksheet(selected_event)
 
-    with st.form("add_schedule_form"):
-        name = st.text_input("名前")
-        date = st.text_input("希望日（例: 2025-05-05）")
-        time_slot = st.text_input("希望時間帯（例: 14:00-15:00）")
-        submitted_schedule = st.form_submit_button("予定を登録する")
+    # 候補日取得
+    dates = list(set([row[1] for row in ws.get_all_values()[1:]]))
+    selected_date = st.selectbox("参加できる日付を選んでください", sorted(dates))
 
-        if submitted_schedule:
-            if name and date and time_slot:
-                try:
-                    # 該当のイベントシート取得
-                    ws = spreadsheet.worksheet(selected_event)
-                    ws.append_row([name, f"'{date}", time_slot])
-                    st.success(f"✅ {name}さんの予定を登録しました！")
+    # 候補時間取得
+    time_slots = [row[2] for row in ws.get_all_values() if row[1] == selected_date]
+    selected_time = st.selectbox("参加できる時間帯を選んでください", time_slots)
+
+    name = st.text_input("あなたの名前を入力してください")
+
+    if st.button("予定を登録する"):
+        if name:
+            # 対象の行を探して名前を記入
+            cell = ws.find(selected_date)
+            while cell:
+                time_cell = ws.cell(cell.row, 3).value
+                if time_cell == selected_time:
+                    ws.update_cell(cell.row, 1, name)
+                    st.success(f"✅ {selected_event}の {selected_date} {selected_time} に登録しました！")
                     st.rerun()
-                except Exception as e:
-                    st.error(f"登録に失敗しました: {e}")
-            else:
-                st.error("⚠️ 全ての項目を入力してください。")
+                    break
+                cell = ws.find(selected_date, cell.row + 1)
+        else:
+            st.error("⚠️ 名前を入力してください。")
 else:
-    st.info("登録できるイベントがまだありません。")
-import pandas as pd
+    st.info("まだイベントがありません。")
+
 
 st.subheader("📊 参加希望集計")
 
